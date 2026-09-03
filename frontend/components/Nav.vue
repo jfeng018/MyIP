@@ -1,299 +1,511 @@
 <template>
-  <!-- Nav -->
-  <header class="navbar navbar-expand-lg bg-body-tertiary mb-3 jn-navbar-top "
-    :class="{ 'dark-mode-nav navbar-dark bg-dark': isDarkMode }">
-    <nav id="navbar-top" class="container-xxl">
-      <div class="jn-logo">
+  <!-- iOS PWA safe-area painter. Pairs with apple-mobile-web-app-status-bar-style=black-translucent
+       in index.html — the only way to get a live status-bar tint on iOS PWA, since WebKit
+       ignores JS theme-color writes and media-variant theme-color tags in standalone mode.
+       Color tracks --page-bg (style.css), which follows .dark class. -->
+  <div class="fixed top-0 left-0 right-0 z-50 pointer-events-none transition-colors duration-300"
+    style="height: env(safe-area-inset-top); background: var(--page-bg);" aria-hidden="true"></div>
+  <header
+    class="fixed top-[env(safe-area-inset-top)] left-0 right-0 z-40 w-full border-b transition-transform duration-300 ease-out will-change-transform"
+    :class="{ '-translate-y-full': isNavHidden,
+    'bg-background/80 supports-[backdrop-filter:blur(0px)]:bg-background/60 backdrop-blur': !isPwa || (isPwa && !isMobile),
+    'bg-page-bg': isPwa && isMobile }">
+    <nav id="navbar-top" class="mx-auto flex w-full max-w-[1600px] items-center gap-2 px-3 sm:px-4 h-14">
 
-        <a class="navbar-brand d-flex align-items-center align-content-center" :class="{ 'text-white': isDarkMode }"
-          href="#" @click="handleLogoClick">
-          <svg :style="{ fill: isDarkMode ? '#fff' : '#212529' }" class="me-1" width="23" height="23"
-            xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision"
-            image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 511 512.35">
-            <path
-              d="M162.62,21.9026663 C157.13,27.3326663 151.99,33.9226663 147.2,41.6126663 C129.83,69.4326663 116.87,111.602666 107.28,164.772666 C50.98,175.412666 16.22,198.912666 17.38,222.912666 C18.42,244.652666 45.84,261.322666 87.05,272.832666 C84.34,281.212666 84.98,282.652666 88.65,292.962666 C57.87,305.942666 25.71,345.362666 0,379.892666 L100.03,447.502666 L64.71,512.352666 L449.12,512.352666 L411.86,447.502666 L511,378.632666 C481.92,337.782666 446.81,303.072666 424.88,293.652666 C429.51,281.632666 430.32,279.532666 426.44,272.862666 C467.65,261.142666 494.67,244.022666 494.61,221.392666 C494.55,196.712666 459.11,173.012666 406.3,164.772666 C393.66,111.272666 381.08,69.1526663 365.07,41.5026663 C362.16,36.4826663 359.14,31.9326663 355.98,27.8826663 C308.32,-33.2373337 291.62,25.1926663 257.84,25.1226663 C218.67,25.0426663 213.69,-28.5673337 162.62,21.9026663 Z M223.27,419.802666 C223.27,416.232666 226.17,413.332666 229.74,413.332666 L240.26,413.332666 C241.64,413.332666 242.92,413.772666 243.96,414.502666 C247.73,416.602666 251.42,417.832666 254.97,417.922666 C256.256726,417.95538 257.551379,417.837477 258.853959,417.554552 C261.134997,417.059103 263.440344,416.057596 265.77,414.472666 C266.837339,413.754341 268.093464,413.368108 269.38,413.362666 L282.16,413.332666 C285.73,413.332666 288.62,416.232666 288.62,419.802666 C288.62,423.372666 285.73,426.272666 282.16,426.272666 L271.21,426.272666 C265.75,429.542666 260.23,430.942666 254.67,430.802666 C249.23,430.662666 243.89,429.032666 238.66,426.272666 L229.74,426.272666 C226.17,426.272666 223.27,423.372666 223.27,419.802666 Z M160.62,279.492666 C221.05,301.232666 281.49,300.872666 341.92,281.322666 C283.47,286.072666 219.13,284.942666 160.62,279.492666 Z M267.04,306.612666 L244.93,306.612666 C210.81,384.892666 122.79,350.782666 142.77,277.672666 C135.46,276.872666 128.26,275.992666 121.21,275.052666 L120.89,276.932666 L120.3,280.492666 L116.82,301.362666 C86.43,294.642666 103.46,373.132666 131.08,366.232666 C135.3,378.412666 136.442197,389.44711 142.34,398.422666 C171.368144,442.599077 205.648487,494.791988 256.040415,494.791988 C306.432342,494.791988 341.594767,438.778379 368.99,398.422666 C375.513955,388.812277 376.14,383.142666 380.53,369.392666 C405.97,373.452666 426.88,296.082666 395.87,301.762666 L392.68,280.712666 L392.13,277.062666 L391.9,275.522666 C384.43,276.682666 376.78,277.722666 368.99,278.632666 C389.88,349.262666 300.46,385.132666 267.04,306.612666 Z M284.280512,176.166601 L284.280512,67.1666006 C366.547618,67.1666006 361.40053,176.166601 284.280512,176.166601 Z M170.780508,409.666601 C182.571845,404.08157 211.029823,401.289054 256.154442,401.289054 C301.27906,401.289054 329.487749,404.08157 340.780508,409.666601 C340.780508,398.413948 339.802073,389.918194 323.84137,384.371704 C288.837937,372.207694 222.824258,373.335802 189.15409,384.371704 C170.816498,390.382125 170.780508,397.067154 170.780508,409.666601 Z M206.779566,446.766602 C218.286957,452.470688 235.027101,455.322731 257,455.322731 C278.972899,455.322731 295.566401,452.470688 306.780508,446.766602 C306.780508,458.019255 306.204953,466.515009 296.816215,472.061498 C286.632212,478.077798 271.985838,480.842479 257.386147,480.76502 C242.467564,480.685868 227.597726,477.639061 217.587657,472.061498 C206.800736,466.051077 206.779566,459.366048 206.779566,446.766602 Z M256.254843,67.1117579 L229.254843,87.6169826 C229.254843,124.271828 229.254843,160.370447 229.254843,204.775426 L256.254843,208.111758 C256.254843,143.245746 256.254843,107.726499 256.254843,67.1117579 Z M207.254843,67.1117579 L180.254843,87.6169826 C180.254843,124.271828 180.254843,160.370447 180.254843,204.775426 L207.254843,208.111758 C207.254843,143.245746 207.254843,107.726499 207.254843,67.1117579 Z"
-              id="Logo"></path>
-          </svg>
-          <span class=" fw-bold  "> IP</span>
-          <span class="fw-lighter">Check.</span>
-          <span class="fw-lighter" :class="{
-          'background-animation-dark': !loaded && isDarkMode,
-          'background-animation-light': !loaded && !isDarkMode
-        }">ing</span>
+      <!-- Left: Hamburger (only mobile) + Brand -->
+      <div class="flex items-center gap-2">
+        <Button v-if="isMobile" variant="ghost" size="icon" class="size-8" :aria-expanded="isNavMenuOpen"
+          aria-label="Toggle navigation menu" @click="store.toggleSheet('navMenu')">
+          <Menu />
+        </Button>
+        <a href="#" @click="handleLogoClick"
+          class="inline-flex items-center gap-1.5 rounded-md px-1 py-1 text-lg font-semibold text-foreground no-underline hover:opacity-80 transition-opacity">
+          <brandIcon />
+          <span class="tracking-tight truncate">
+            <span class="font-bold">IP</span><span class="font-extralight">Check.</span>
+            <span class="font-extralight"
+              :class="{ 'jn-shimmer-light': !loaded && !isDarkMode, 'jn-shimmer-dark': !loaded && isDarkMode }">ing</span>
+          </span>
         </a>
-
-        <div class="btn-group mx-1" :data-bs-theme="isDarkMode ? 'dark' : 'light'">
-          <button type="button" class="btn btn-sm dropdown-toggle jn-button" data-bs-toggle="dropdown"
-            aria-expanded="false" aria-label="Language Selection">
-            <i class="bi bi-translate"></i>
-          </button>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="?hl=zh" @click="trackEvent('Nav', 'ToggleClick', 'LanguageChange')"><i
-                  class="fi fi-cn"></i> 中文</a></li>
-            <li><a class="dropdown-item" href="?hl=en" @click="trackEvent('Nav', 'ToggleClick', 'LanguageChange')"><i
-                  class="fi fi-us"></i> English</a></li>
-            <li><a class="dropdown-item" href="?hl=fr" @click="trackEvent('Nav', 'ToggleClick', 'LanguageChange')"><i
-                  class="fi fi-fr"></i> Français</a></li>
-          </ul>
-        </div>
-
-        <div id="Preferences" class="preference-button" @click.prevent="OpenPreferences" role="button"
-          aria-label="Preferences">
-          <i class="bi bi-toggles"></i>
-        </div>
-
       </div>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation"
-        @click="closeAllOffCanvas">
-        <span class="navbar-toggler-icon bg-transparent "></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
-        <!-- 导航循环 -->
-        <div class="navbar-nav ">
-          <a v-for="item in ['IPInfo', 'Connectivity', 'WebRTC', 'DNSLeakTest', 'SpeedTest', 'AdvancedTools']"
-            :key="item" class="nav-link" :class="{ 'text-white jn-deactive': isDarkMode }" :href="`#${item}`"
-            @click="collapseNav(); trackEvent('Nav', 'NavClick', item)">{{
-            t(`nav.${item}`) }}</a>
-        </div>
-        <a :href="t('page.footerLink')" class="btn jn-fs" id="githubStars"
-          :class="{ 'btn-outline-light': isDarkMode, 'btn-dark': !isDarkMode, 'mt-2': isMobile, 'ms-2': !isMobile }"
-          target="_blank" @click="trackEvent('Footer', 'FooterClick', 'Github');" aria-label="Github">
-          <div><i class="bi bi-github"></i></div>
-          <div class="row flex-column ">
-            <TransitionGroup name="slide-fade">
-              <span key="default" class="col-12 jn-w" v-if="githubStars === 0">&nbsp;GitHub</span>
-              <span key="stars" class="col-12 jn-w" v-if="githubStars > 0">
-                &nbsp;{{ githubStars }}
-                <i class="bi bi-star-fill" :class="[isDarkMode ? 'redstar' : 'yellowstar']"></i>
-              </span>
-            </TransitionGroup>
 
-          </div>
-        </a>
+      <!-- Middle: Desktop nav links + GitHub star badge (left aligned, next to brand) -->
+      <div v-if="!isMobile" class="flex items-center gap-0.5">
+        <template v-for="item in navItems" :key="item">
+          <!-- Advanced Tools: hover reveals the sub-tools, click scrolls to the
+               section (disable-click-trigger frees the click from toggling the
+               menu; viewport=false anchors the panel under the trigger). -->
+          <NavigationMenu v-if="item === 'AdvancedTools'" as="div" :viewport="false" :disable-click-trigger="true"
+            class="flex-none">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger :class="['h-auto bg-transparent', navLinkClass(item)]"
+                  @click="scrollToSection('AdvancedTools'); trackEvent('Nav', 'NavClick', item)">
+                  {{ t(`nav.${item}`) }}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent class="z-50">
+                  <!-- Two-column grid on PC -->
+                  <ul class="relative grid grid-cols-2 gap-x-4 gap-y-0.5 min-w-[28rem]">
+                    <span aria-hidden="true"
+                      class="pointer-events-none absolute inset-y-1 left-1/2 w-px -translate-x-1/2 bg-border"></span>
+                    <li v-for="tool in advancedTools" :key="tool.slug">
+                      <NavigationMenuLink as-child class="cursor-pointer">
+                        <button type="button" class="w-full text-left leading-snug" @click="openTool(tool.slug)">
+                          {{ t(tool.titleKey) }}
+                        </button>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+          <!-- All other sections stay plain smooth-scroll anchors. -->
+          <a v-else href="#" :class="navLinkClass(item)"
+            @click.prevent="scrollToSection(item); trackEvent('Nav', 'NavClick', item)">
+            {{ t(`nav.${item}`) }}
+          </a>
+        </template>
+        <!-- GitHub repo link + star count from our own /api/github-stars
+             (edge-cached). The count is hidden until it lands / on error, so the
+             link itself never depends on the fetch. -->
+        <Badge variant="outline" v-if="githubStarsLabel">
+          <a :href="t('page.footerLink')" target="_blank" rel="noopener" class="inline-flex items-center gap-1"
+            aria-label="Star on GitHub" title="Star on GitHub">
+            <Icon icon="ri:star-fill" class="size-3.5 text-yellow-400" />
+            <span class="tabular-nums">{{ githubStarsLabel }}</span>
+            <Icon icon="ri:github-line" class="size-3.5" />
+          </a>
+        </Badge>
+      </div>
+
+      <!-- Right: Action area (ml-auto push to the right) -->
+      <div class="ml-auto flex items-center gap-2">
+        <!-- Earth Online entry (code name: pulse) -->
+        <Pulse />
+
+        <!-- Docs assistant entry point (ask box on desktop, icon on mobile) -->
+        <DocsSearch />
+
+        <!-- Preferences — standalone cog only for Firebase-less self-hosted
+             instances (no user menu to host it). With the user system on,
+             preferences lives inside the user dropdown for every state. -->
+        <JnTooltip v-if="!isFireBaseSet" :text="t('nav.preferences.title')">
+          <Button variant="ghost" size="icon" class="size-8 cursor-pointer" aria-label="Open preferences"
+            @click="OpenPreferences">
+            <Cog />
+          </Button>
+        </JnTooltip>
+
+        <!-- Sign In / User Dropdown -->
+        <DropdownMenu v-if="isFireBaseSet">
+          <DropdownMenuTrigger as-child>
+            <!-- Not signed in: the solid block reads as the "sign in"
+                 call-to-action, and the menu opens on the sign-in options, so
+                 the affordance is self-explaining one click deep. -->
+            <Button v-if="!isSignedIn" size="sm" @click="getUserInfo" class="h-8 gap-1 px-1.5 cursor-pointer"
+              aria-label="User menu">
+              <UserRound class="size-5" />
+              <ChevronDown class="opacity-60" />
+            </Button>
+            <!-- Signed in: avatar + chevron -->
+            <Button v-else variant="ghost" size="sm" @click="getUserInfo" class="h-8 gap-1 px-1 cursor-pointer"
+              aria-label="User menu">
+              <span class="inline-flex size-7 overflow-hidden rounded-full">
+                <img :src="userPhotoURL" :alt="userName" :title="userName" class="size-full object-cover"
+                  referrerpolicy="no-referrer">
+              </span>
+              <ChevronDown class="opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" class="w-56 shadow-md">
+            <!-- Signed in -->
+            <template v-if="isSignedIn">
+              <div class="px-2 pt-2 pb-3">
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex size-10 overflow-hidden rounded-full shrink-0">
+                    <img :src="userPhotoURL" :alt="userName" class="size-full object-cover"
+                      referrerpolicy="no-referrer">
+                  </span>
+                  <div class="flex min-w-0 flex-1 flex-col gap-1">
+                    <span class="truncate text-sm font-semibold leading-none">{{ userName }}</span>
+                    <span v-if="remoteUserInfoFetched && remoteUserInfo.userLevel">
+                      <Badge :class="levelBadgeClass"
+                        class="border-transparent text-[10px] font-medium px-1.5 py-0 h-4">
+                        {{ t('user.Level.' + remoteUserInfo.userLevel) }}
+                      </Badge>
+                    </span>
+                    <span v-else-if="!remoteUserInfoFetched" class="text-xs text-muted-foreground">{{
+                      t('user.Fields.Fetching') }}</span>
+                  </div>
+                </div>
+                <dl class="mt-3 space-y-1 text-xs">
+                  <div class="flex items-baseline justify-between gap-2">
+                    <dt class="text-muted-foreground">{{ t('user.Fields.CreatedAt') }}</dt>
+                    <dd class="font-medium">{{ userCreatedAt }}</dd>
+                  </div>
+                  <!-- How this account signs in. One account per email
+                       address, so this is also the only way in. -->
+                  <div v-if="linkedProviders.length" class="flex items-baseline justify-between gap-2">
+                    <dt class="text-muted-foreground">{{ t('user.Fields.SignInMethods') }}</dt>
+                    <dd class="flex min-w-0 items-center gap-1.5 font-medium">
+                      <span v-for="provider in linkedProviders" :key="provider.providerId"
+                        class="inline-flex items-center gap-1" :title="provider.label">
+                        <Icon v-if="provider.icon" :icon="provider.icon" class="size-3.5 shrink-0" />
+                        <span>{{ provider.label }}</span>
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem class="cursor-pointer" @select="store.setTriggerAchievements(true)">
+                <Award />
+                <span>{{ t('user.MyAchievements') }}</span>
+              </DropdownMenuItem>
+            </template>
+
+            <!-- Not signed in -->
+            <template v-else>
+              <DropdownMenuItem class="cursor-pointer" @select="store.signInWithGoogle">
+                <Icon icon="ri:google-line" />
+                <span>{{ t('user.SignInWithGoogle') }}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem class="cursor-pointer" @select="store.signInWithGithub">
+                <Icon icon="ri:github-line" />
+                <span>{{ t('user.SignInWithGithub') }}</span>
+              </DropdownMenuItem>
+            </template>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuItem class="cursor-pointer" @select="OpenPreferences">
+              <Cog />
+              <span>{{ t('nav.preferences.title') }}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem class="cursor-pointer" @select="store.setTriggerUserBenefits(true)">
+              <HeartHandshake />
+              <span>{{ t('user.Benefits.Title') }}</span>
+            </DropdownMenuItem>
+
+            <template v-if="isSignedIn">
+              <DropdownMenuSeparator />
+              <DropdownMenuItem class="cursor-pointer" @select="store.signOut">
+                <LogOut />
+                <span>{{ t('user.SignOut') }}</span>
+              </DropdownMenuItem>
+            </template>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
+
+    <!-- Mobile navigation drawer. Flex column so the link list scrolls instead
+         of clipping on short screens when Advanced Tools is expanded. -->
+    <Sheet v-if="isMobile" :open="isNavMenuOpen" @update:open="onNavMenuChange">
+      <SheetContent side="left" class="w-80 p-0 flex flex-col gap-0" :title="t('nav.Navigation')">
+        <div class="flex shrink-0 items-center justify-between border-b px-4 py-3">
+          <h5 class="m-0 text-base font-semibold">{{ t('nav.Navigation') }}</h5>
+          <SheetClose />
+        </div>
+        <nav class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto p-3">
+          <template v-for="item in navItems" :key="item">
+            <!-- Advanced Tools expands inline into its sub-tools (open by default)
+                 so they're discoverable, not hidden behind a bare label. -->
+            <Collapsible v-if="item === 'AdvancedTools'" v-model:open="mobileToolsOpen">
+              <CollapsibleTrigger as-child>
+                <button type="button"
+                  :class="[navLinkClass(item, { block: true }), 'flex w-full items-center justify-between']">
+                  <span>{{ t(`nav.${item}`) }}</span>
+                  <ChevronDown class="size-4 shrink-0 opacity-60 transition-transform duration-200"
+                    :class="{ 'rotate-180': mobileToolsOpen }" />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div class="my-0.5 ml-3 flex flex-col gap-0.5 border-l pl-3">
+                  <button v-for="tool in advancedTools" :key="tool.slug" type="button"
+                    class="block w-full rounded-md px-3 py-1.5 text-left text-sm leading-snug text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+                    @click="openTool(tool.slug)">
+                    {{ t(tool.titleKey) }}
+                  </button>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+            <!-- All other sections stay plain smooth-scroll anchors. -->
+            <a v-else href="#" :class="navLinkClass(item, { block: true })"
+              @click.prevent="scrollToSection(item); trackEvent('Nav', 'NavClick', item); store.setOpenSheet(null)">
+              {{ t(`nav.${item}`) }}
+            </a>
+          </template>
+          <a :href="t('page.footerLink')" target="_blank" rel="noopener"
+            class="mt-3 flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted">
+            <Icon icon="ri:github-line" class="size-4" />
+            <span>Star on GitHub</span>
+            <!-- Same /api/github-stars count as the desktop badge (fetched on
+                 mount); hidden until it lands / on error. -->
+            <span v-if="githubStarsLabel"
+              class="ml-auto tabular-nums text-muted-foreground inline-flex items-center gap-1">
+              <Icon icon="ri:star-fill" class="size-3.5 text-yellow-400" />
+              {{ githubStarsLabel }}
+            </span>
+          </a>
+        </nav>
+      </SheetContent>
+    </Sheet>
   </header>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
-import { trackEvent } from '@/utils/use-analytics';
-import { Offcanvas } from 'bootstrap';
+import { trackEvent } from '@/utils/analytics';
+import { unixToDateTime } from '@/utils/time-utils';
+import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+} from '@/components/ui/navigation-menu';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { JnTooltip } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
+  Award, ChevronDown, UserRound, HeartHandshake,
+  LogOut, Menu, Cog,
+} from '@lucide/vue';
+import DocsSearch from '@/components/widgets/DocsSearch.vue';
+import Pulse from '@/components/widgets/Pulse.vue';
+import { Icon } from '@iconify/vue';
+import brandIcon from './svgicons/Brand.vue';
+import { SECTION_IDS } from '@/data/sections';
+import { ADVANCED_TOOLS } from '@/data/tools.js';
+import { fetchWithTimeout } from '@/utils/fetch-with-timeout.js';
+import { formatStarCount } from '@/utils/format-star-count.js';
+import { isRunningAsPwa } from '@/utils/pwa.js';
 
-const { t } = useI18n();
-
+const { t, locale } = useI18n();
 const store = useMainStore();
+const router = useRouter();
+
 const isDarkMode = computed(() => store.isDarkMode);
 const isMobile = computed(() => store.isMobile);
+const currentSection = computed(() => store.currentSection);
+const loaded = computed(() => store.allHasLoaded);
 
-const loaded = ref(false);
-const githubStars = ref(0);
+// Running as an installed PWA (chromeless window). Distinct from the app's
+// "standalone tool pages" — see utils/pwa.js.
+const isPwa = isRunningAsPwa();
 
-const closeAllOffCanvas = () => {
-  const offcanvasElements = document.querySelectorAll('.offcanvas');
-  if (offcanvasElements.length === 0) {
-    return;
+const navItems = SECTION_IDS;
+
+// Tools shown in the nav, mirroring Advanced.vue's enabledCards: original-site-
+// only tools stay hidden on self-hosted instances. Reactive on configs.
+const configs = computed(() => store.configs);
+const advancedTools = computed(() =>
+  ADVANCED_TOOLS.filter((tool) => !tool.requiresOriginalSite || configs.value.originalSite),
+);
+
+// Mobile: Advanced Tools sub-list expanded by default for discoverability.
+const mobileToolsOpen = ref(true);
+
+// GitHub star count for the repo badge. Fetched from our own edge-cached
+// endpoint; stays null (badge hides the count) if the request fails.
+const githubStars = ref(null);
+const githubStarsLabel = computed(() => formatStarCount(githubStars.value));
+const fetchGithubStars = async () => {
+  try {
+    const res = await fetchWithTimeout('/api/github-stars');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (typeof data.stars === 'number') githubStars.value = data.stars;
+  } catch {
+    /* leave the badge without a count */
   }
-  document.querySelectorAll('.offcanvas').forEach((offcanvas) => {
-    const instance = Offcanvas.getInstance(offcanvas);
-    if (instance) {
-      instance.hide();
-    }
-  });
 };
 
-// 打开偏好设置
-const OpenPreferences = () => {
-  var offcanvasElement = document.getElementById('offcanvasPreferences');
-  var offcanvas = Offcanvas.getInstance(offcanvasElement) || new Offcanvas(offcanvasElement);
-  if (offcanvasElement.classList.contains('show')) {
-    offcanvas.hide();
-  } else {
-    offcanvas.show();
-  }
+// nav link style — current section highlight use bg-accent instead of only bold
+const navLinkClass = (item, { block = false } = {}) => {
+  const base = 'rounded-md px-3 py-1.5 text-sm font-medium no-underline cursor-pointer transition-colors';
+  const state = item === currentSection.value
+    ? 'bg-accent text-accent-foreground'
+    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground';
+  return [base, state, block ? 'block' : ''].filter(Boolean).join(' ');
+};
 
+// Firebase / User
+const isFireBaseSet = computed(() => store.isFireBaseSet);
+const isSignedIn = computed(() => store.isSignedIn);
+const userName = computed(() => store.user?.displayName);
+const userPhotoURL = computed(() => store.user?.photoURL);
+const userCreatedAt = computed(() => unixToDateTime(store.user?.metadata.createdAt, locale.value));
+const remoteUserInfo = computed(() => store.remoteUserInfo);
+const remoteUserInfoFetched = computed(() => store.remoteUserInfoFetched);
+// Sign-in methods attached to this account.
+const linkedProviders = computed(() => store.linkedProviders);
+
+// Level Badge Color: mapped to semantic token, keep each level color distinction
+const levelBadgeClass = computed(() => {
+  const level = remoteUserInfo.value?.userLevel;
+  switch (level) {
+    case 'Premium': return 'bg-action text-action-foreground';
+    case 'Owner': return 'bg-foreground text-background';
+    case 'Developer': return 'bg-success text-success-foreground';
+    case 'HonoraryMember': return 'bg-warning text-warning-foreground';
+    case 'Standard':
+    default: return 'bg-muted-foreground text-background';
+  }
+});
+
+const getUserInfo = async () => {
+  if (remoteUserInfoFetched.value || !isSignedIn.value) return;
+  store.setTriggerRemoteUserInfo(true);
+};
+
+
+const isNavMenuOpen = computed(() => store.openSheet === 'navMenu');
+const onNavMenuChange = (val) => {
+  store.setOpenSheet(val ? 'navMenu' : null);
+};
+
+// Opens the Preferences sheet
+const OpenPreferences = () => {
+  store.toggleSheet('preferences');
   trackEvent('Nav', 'NavClick', 'Preferences');
 };
 
-//获取 GitHub stars
-const getGitHubStars = async () => {
-  const url = `https://api.github.com/repos/jason5ng32/MyIP`;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    setTimeout(() => {
-      githubStars.value = data.stargazers_count;
-    }, 1000);
-  } catch (error) {
-    console.error('Failed to fetch Github data:', error);
-    githubStars.value = 0;
-  }
-};
-
-// 收起导航栏
-const collapseNav = () => {
-  document.querySelector('#navbarNavAltMarkup').classList.remove('show');
-};
-
-
-// 点击 Logo 事件处理
-const handleLogoClick = () => {
+// At top → full refresh; mid-page → smooth scroll up. preventDefault
+// avoids the native instant-jump of <a href="#">.
+const handleLogoClick = (e) => {
   if (window.scrollY === 0) {
     store.setRefreshEveryThing(true);
-    // loaded.value = false;
+  } else {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   trackEvent('Nav', 'NavClick', 'Logo');
 };
 
-// 开始时获取 GitHub stars
+// Menu scroll (leave space for sticky header)
+const scrollToSection = (el, offset = 70) => {
+  const element = typeof el === 'string' ? document.getElementById(el) : el;
+  if (!element) return;
+  const y = element.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: y, behavior: 'smooth' });
+};
+
+// Open a tool from the nav: scroll to the Advanced Tools section, then raise the
+// drawer (driven by the `?tool=` query Advanced.vue watches). Scrolls twice — the
+// mobile nav Sheet locks body scroll until it closes, so the first scroll is a
+// no-op there and the deferred one lands after the Sheet is gone.
+let openToolTimer = null;
+const openTool = (slug) => {
+  store.setOpenSheet(null);            // close the mobile nav Sheet (no-op on desktop)
+  scrollToSection('AdvancedTools');
+  clearTimeout(openToolTimer);
+  openToolTimer = setTimeout(() => {
+    scrollToSection('AdvancedTools');
+    router.push({ path: '/', query: { tool: slug } });
+  }, 300);
+  const name = slug.charAt(0).toUpperCase() + slug.slice(1);
+  trackEvent('Nav', 'NavClick', name);
+};
+
+// Mobile: hide nav on scroll-down, show on scroll-up.
+// SCROLL_DELTA filters out micro-jitter; SHOW_AT_TOP forces the nav
+// visible near the top of the page regardless of direction.
+const isNavHidden = ref(false);
+let lastScrollY = 0;
+let scrollTicking = false;
+const SCROLL_DELTA = 5;
+const SHOW_AT_TOP = 48;
+
+const onScroll = () => {
+  if (scrollTicking) return;
+  scrollTicking = true;
+  requestAnimationFrame(() => {
+    const y = window.scrollY;
+    const dy = y - lastScrollY;
+    if (y <= SHOW_AT_TOP) {
+      isNavHidden.value = false;
+    } else if (Math.abs(dy) > SCROLL_DELTA) {
+      // Keep nav visible while the menu drawer is open so its close
+      // affordance stays in place.
+      if (dy > 0 && !isNavMenuOpen.value) {
+        isNavHidden.value = true;
+      } else if (dy < 0) {
+        isNavHidden.value = false;
+      }
+    }
+    lastScrollY = y;
+    scrollTicking = false;
+  });
+};
+
+watch(isMobile, (mobile) => {
+  if (!mobile) {
+    isNavHidden.value = false;
+    window.removeEventListener('scroll', onScroll);
+  } else {
+    lastScrollY = window.scrollY;
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+}, { immediate: false });
+
 onMounted(() => {
-  setTimeout(() => {
-    getGitHubStars();
-  }, 1000)
+  if (isMobile.value) {
+    lastScrollY = window.scrollY;
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+  fetchGithubStars();
 });
 
-watch(() => store.allHasLoaded, (newValue) => {
-  loaded.value = newValue;
-});
-
-// 暴露给 App.vue 的数据
-defineExpose({
-  OpenPreferences,
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll);
+  clearTimeout(openToolTimer);
 });
 </script>
 
 <style scoped>
-.jn-checkbox {
-  display: none;
-}
-
-.slide-fade-enter-active {
-  transition: all 0.3s ease-in-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from {
-  transform: translateY(30px);
-  opacity: 0;
-}
-
-.slide-fade-leave-to {
-  transform: translateY(-30px);
-  opacity: 0;
-}
-
-.jn-fs {
-  font-size: smaller;
-  display: flex;
-  max-height: 25pt;
-  overflow: hidden;
-  width: fit-content;
-}
-
-.jn-w {
-  width: 60pt;
-}
-
-.redstar {
-  color: rgb(253 131 3);
-}
-
-.yellowstar {
-  color: rgb(255 216 0);
-}
-
-.switch {
-  background-color: #111;
-  border-radius: 50px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 5px;
-  position: relative;
-  height: 26px;
-  width: 50px;
-  transform: scale(0.7);
-  box-shadow: 0 0 2px white;
-}
-
-.switch .ball {
-  background-color: #fff;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  height: 22px;
-  width: 22px;
-  transform: translateX(0px);
-  transition: transform 0.2s linear;
-}
-
-.jn-checkbox:checked+.switch .ball {
-  transform: translateX(24px);
-}
-
-.jn-button:hover {
-  border: 0;
-}
-
-.jn-button:active {
-  border: 0;
-}
-
-.jn-button:focus {
-  border: 0;
-}
-
-.jn-button {
-  border: 0;
-}
-
-.background-animation-light {
+.jn-shimmer-light,
+.jn-shimmer-dark {
   position: relative;
   overflow: hidden;
   display: inline-flex;
 }
 
-.background-animation-light::before {
+.jn-shimmer-light::before,
+.jn-shimmer-dark::before {
   content: '';
   position: absolute;
   bottom: 0;
   left: -100%;
   width: 100%;
   height: 10%;
+  animation: jn-shimmer-slide 1s linear infinite;
+}
+
+.jn-shimmer-light::before {
   background-color: rgb(0, 0, 0);
-  animation: backgroundSlide 1s linear infinite;
 }
 
-.background-animation-dark {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-}
-
-.background-animation-dark::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: -100%;
-  width: 100%;
-  height: 10%;
+.jn-shimmer-dark::before {
   background-color: rgb(255, 255, 255);
-  animation: backgroundSlide 1s linear infinite;
 }
 
-@keyframes backgroundSlide {
+@keyframes jn-shimmer-slide {
   from {
     left: -100%;
   }
@@ -301,13 +513,5 @@ defineExpose({
   to {
     left: 100%;
   }
-}
-
-.preference-button {
-  margin-left: 8pt;
-}
-
-.container-xxl {
-  max-width: 1600px;
 }
 </style>
